@@ -6,4 +6,6 @@
 
 #include "mquickjs.h"
 
+extern const JSSTDLibraryDef js_stdlib;
+
 #endif /* MQUICKJS_SYS_WRAPPER_H */

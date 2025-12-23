@@ -64,6 +64,38 @@ fn generate_atom_header(
     header_path
 }
 
+fn generate_stdlib_source(
+    mqjs_stdlib: &Path,
+    out_dir: &Path,
+    target_pointer_width: &str,
+) -> PathBuf {
+    let mut cmd = Command::new(mqjs_stdlib);
+    if target_pointer_width == "32" {
+        cmd.arg("-m32");
+    }
+
+    let output = cmd.output().expect("failed to run mqjs_stdlib");
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        panic!("mqjs_stdlib failed: {stderr}");
+    }
+
+    let source_path = out_dir.join("mquickjs_stdlib.c");
+    let mut contents = String::from("#include <stddef.h>\n#include <stdint.h>\n#include \"mquickjs_priv.h\"\n\n");
+    contents.push_str(
+        "JSValue js_print(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);\n\
+JSValue js_gc(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);\n\
+JSValue js_date_now(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);\n\
+JSValue js_performance_now(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);\n\
+JSValue js_load(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);\n\
+JSValue js_setTimeout(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);\n\
+JSValue js_clearTimeout(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);\n\n",
+    );
+    contents.push_str(&String::from_utf8_lossy(&output.stdout));
+    std::fs::write(&source_path, contents).expect("failed to write mquickjs_stdlib.c");
+    source_path
+}
+
 fn main() {
     let manifest_dir =
         PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
@@ -88,6 +120,10 @@ fn main() {
             mquickjs_dir.join(generator).display()
         );
     }
+    println!(
+        "cargo:rerun-if-changed={}",
+        manifest_dir.join("src").join("stdlib_stubs.c").display()
+    );
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
     let wrapper = manifest_dir.join("wrapper.h");
@@ -106,7 +142,9 @@ fn main() {
 
     let mqjs_stdlib = build_mqjs_stdlib(&mquickjs_dir, &out_dir, &host);
     let atom_header = generate_atom_header(&mqjs_stdlib, &out_dir, &target_pointer_width);
+    let stdlib_source = generate_stdlib_source(&mqjs_stdlib, &out_dir, &target_pointer_width);
     println!("cargo:rerun-if-changed={}", atom_header.display());
+    println!("cargo:rerun-if-changed={}", stdlib_source.display());
 
     let bindings = bindgen::Builder::default()
         .header(wrapper.to_string_lossy())
@@ -115,6 +153,7 @@ fn main() {
         .allowlist_type("JS.*")
         .allowlist_function("JS_.*")
         .allowlist_var("JS_.*")
+        .allowlist_var("js_stdlib")
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .generate()
         .expect("unable to generate bindings");
@@ -130,6 +169,8 @@ fn main() {
     for source in &sources {
         build.file(mquickjs_dir.join(source));
     }
+    build.file(&stdlib_source);
+    build.file(manifest_dir.join("src").join("stdlib_stubs.c"));
 
     let compiler = build.get_compiler();
     if compiler.is_like_msvc() {
