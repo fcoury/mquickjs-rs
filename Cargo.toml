@@ -1,0 +1,3 @@
+[workspace]
+members = ["mquickjs-sys"]
+resolver = "2"
