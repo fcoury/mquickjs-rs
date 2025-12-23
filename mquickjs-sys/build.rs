@@ -90,6 +90,8 @@ fn main() {
     }
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").expect("OUT_DIR not set"));
+    let wrapper = manifest_dir.join("wrapper.h");
+    println!("cargo:rerun-if-changed={}", wrapper.display());
     println!("cargo:rustc-env=MQUICKJS_SYS_OUT_DIR={}", out_dir.display());
     let joined_sources = sources
         .iter()
@@ -105,6 +107,21 @@ fn main() {
     let mqjs_stdlib = build_mqjs_stdlib(&mquickjs_dir, &out_dir, &host);
     let atom_header = generate_atom_header(&mqjs_stdlib, &out_dir, &target_pointer_width);
     println!("cargo:rerun-if-changed={}", atom_header.display());
+
+    let bindings = bindgen::Builder::default()
+        .header(wrapper.to_string_lossy())
+        .clang_arg(format!("-I{}", mquickjs_dir.display()))
+        .clang_arg(format!("-I{}", out_dir.display()))
+        .allowlist_type("JS.*")
+        .allowlist_function("JS_.*")
+        .allowlist_var("JS_.*")
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .generate()
+        .expect("unable to generate bindings");
+
+    bindings
+        .write_to_file(out_dir.join("bindings.rs"))
+        .expect("could not write bindings");
 
     let mut build = cc::Build::new();
     build.include(&mquickjs_dir);
