@@ -1,0 +1,9 @@
+[package]
+name = "mquickjs"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+
+[dependencies]
+mquickjs-sys = { path = "../mquickjs-sys" }
+thiserror = "1.0"

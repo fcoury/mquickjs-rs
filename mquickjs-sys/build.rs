@@ -20,6 +20,7 @@ fn build_mqjs_stdlib(mquickjs_dir: &Path, out_dir: &Path, host: &str) -> PathBuf
     let mut build = cc::Build::new();
     build.host(host).target(host);
     build.include(mquickjs_dir);
+    build.warnings(false);
     build.flag_if_supported("-std=c99");
     build.flag_if_supported("-O2");
 
@@ -165,6 +166,7 @@ fn main() {
     let mut build = cc::Build::new();
     build.include(&mquickjs_dir);
     build.include(&out_dir);
+    build.warnings(false);
 
     for source in &sources {
         build.file(mquickjs_dir.join(source));
