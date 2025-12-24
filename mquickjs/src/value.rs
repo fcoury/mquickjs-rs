@@ -25,6 +25,10 @@ impl<'ctx> Value<'ctx> {
         }
     }
 
+    pub(crate) fn ctx(&self) -> NonNull<JSContext> {
+        self.ctx
+    }
+
     pub(crate) fn raw(&self) -> JSValue {
         self.raw
     }

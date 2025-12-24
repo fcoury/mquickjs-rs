@@ -51,6 +51,10 @@ impl Context {
         Ok(Value::new(self.ctx, value))
     }
 
+    pub(crate) fn raw_ctx(&self) -> NonNull<JSContext> {
+        self.ctx
+    }
+
     /// Evaluate a script and convert the result to i32.
     pub fn eval_i32(&self, script: &str, filename: &str) -> Result<i32, JsError> {
         self.eval(script, filename)?.to_i32()
