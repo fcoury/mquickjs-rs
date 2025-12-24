@@ -17,11 +17,13 @@ mod context;
 mod convert;
 mod error;
 mod func;
+mod object;
 mod rooted;
 mod value;
 
 pub use context::Context;
 pub use convert::{FromValue, IntoValue};
 pub use error::JsError;
+pub use object::{Array, Object};
 pub use rooted::RootedValue;
 pub use value::Value;
