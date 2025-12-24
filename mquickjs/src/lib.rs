@@ -19,6 +19,7 @@ mod error;
 mod func;
 mod object;
 mod rooted;
+mod runtime;
 mod value;
 
 pub use context::Context;
@@ -26,4 +27,5 @@ pub use convert::{FromValue, IntoValue};
 pub use error::JsError;
 pub use object::{Array, Object};
 pub use rooted::RootedValue;
+pub use runtime::Runtime;
 pub use value::Value;
