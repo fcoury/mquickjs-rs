@@ -13,6 +13,18 @@ This workspace contains two crates:
 - A C compiler supported by the `cc` crate
 - Submodules initialized in the parent repository
 
+## Install from crates.io
+
+```bash
+cargo add mquickjs
+```
+
+Or in `Cargo.toml`:
+
+```toml
+mquickjs = "0.1.0"
+```
+
 ## Quick Start
 
 Run the tests from the workspace root:
