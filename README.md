@@ -49,20 +49,21 @@ cargo run -p mquickjs-rs --example eval
 ## Usage
 
 ```rust
-use mquickjs_rs::{Context, Value};
+use mquickjs_rs::{Function, IntoValue, Runtime};
 
-let ctx = Context::new(1024 * 1024).expect("context should initialize");
+let runtime = Runtime::new().expect("runtime should initialize");
+let ctx = runtime.context().expect("context should initialize");
 
-let sum = ctx.eval_i32("1 + 2 + 3", "example").expect("eval should succeed");
-assert_eq!(sum, 6);
-
-ctx.register_fn("echo", |args: &[Value<'_>]| Ok(args[0]))
-    .expect("register should succeed");
-
-let echoed = ctx
-    .eval_string("echo('hello')", "example")
+let func_value = ctx
+    .eval("(function(a, b) { return a + b; })", "example")
     .expect("eval should succeed");
-assert_eq!(echoed, "hello");
+let func = Function::from_value(&ctx, func_value).expect("function should wrap");
+
+let arg1 = 2i32.into_value(&ctx).expect("arg should convert");
+let arg2 = 3i32.into_value(&ctx).expect("arg should convert");
+let result = func.call(&[arg1, arg2]).expect("call should succeed");
+let sum = result.to_i32().expect("result should convert");
+assert_eq!(sum, 5);
 ```
 
 ## Notes
