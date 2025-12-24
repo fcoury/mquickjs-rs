@@ -10,6 +10,15 @@ rust-version = "1.89"
 links = "mquickjs"
 keywords = ["javascript", "quickjs", "embedded", "ffi"]
 categories = ["external-ffi-bindings", "embedded"]
+include = [
+  "build.rs",
+  "Cargo.toml",
+  "README.md",
+  "src/**",
+  "tests/**",
+  "wrapper.h",
+  "vendor/mquickjs/**"
+]
 
 [dependencies]
 

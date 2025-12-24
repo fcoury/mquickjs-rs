@@ -45,4 +45,14 @@ fn build_lists_compiled_c_sources() {
             basenames
         );
     }
+
+    let vendor_marker = if cfg!(windows) {
+        "vendor\\mquickjs"
+    } else {
+        "vendor/mquickjs"
+    };
+    assert!(
+        sources.contains(vendor_marker),
+        "expected vendored sources in build list; got {sources}"
+    );
 }

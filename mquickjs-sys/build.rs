@@ -3,6 +3,10 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn mquickjs_dir(manifest_dir: &Path) -> PathBuf {
+    let vendored = manifest_dir.join("vendor").join("mquickjs");
+    if vendored.exists() {
+        return vendored;
+    }
     manifest_dir.join("..").join("..").join("mquickjs")
 }
 
