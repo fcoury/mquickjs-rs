@@ -19,6 +19,8 @@ pub struct Context {
 
 impl Context {
     /// Create a new JavaScript context with the given memory buffer size.
+    ///
+    /// The buffer must be at least 1024 bytes.
     pub fn new(memory_bytes: usize) -> Result<Self, JsError> {
         if memory_bytes < 1024 {
             return Err(JsError::ContextInit {
@@ -69,6 +71,19 @@ impl Context {
     }
 
     /// Register a Rust callback callable from JavaScript.
+    ///
+    /// ```no_run
+    /// use mquickjs::{Context, Value};
+    ///
+    /// let ctx = Context::new(1024 * 1024).expect("context should initialize");
+    /// ctx.register_fn("echo", |args: &[Value<'_>]| {
+    ///     let _input = args[0].to_i32()?;
+    ///     Ok(args[0])
+    /// }).expect("register should succeed");
+    ///
+    /// let result = ctx.eval_i32("echo(1+1)", "example").expect("eval should succeed");
+    /// assert_eq!(result, 2);
+    /// ```
     pub fn register_fn<F>(&self, name: &str, func: F) -> Result<(), JsError>
     where
         F: for<'ctx> Fn(&[Value<'ctx>]) -> Result<Value<'ctx>, JsError> + 'static,
