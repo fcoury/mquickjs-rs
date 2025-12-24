@@ -1,4 +1,4 @@
-use mquickjs::{Context, Value};
+use mquickjs_rs::{Context, Value};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ctx = Context::new(1024 * 1024)?;

@@ -1,23 +1,23 @@
-# mquickjs
+# mquickjs-rs
 
 Safe, idiomatic Rust wrapper for the MicroQuickJS engine.
 
 ## Installation
 
 ```bash
-cargo add mquickjs
+cargo add mquickjs-rs
 ```
 
 Or in `Cargo.toml`:
 
 ```toml
-mquickjs = "0.1.0"
+mquickjs-rs = "0.1.0"
 ```
 
 ## Usage
 
 ```rust
-use mquickjs::{Context, Value};
+use mquickjs_rs::{Context, Value};
 
 let ctx = Context::new(1024 * 1024).expect("context should initialize");
 

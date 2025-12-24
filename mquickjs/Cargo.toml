@@ -1,5 +1,5 @@
 [package]
-name = "mquickjs"
+name = "mquickjs-rs"
 version = "0.1.0"
 description = "Safe, idiomatic Rust wrapper for the MicroQuickJS engine"
 license = "MIT"

@@ -5,7 +5,7 @@ Safe and low-level Rust bindings for the MicroQuickJS (mquickjs) JavaScript engi
 This workspace contains two crates:
 
 - `mquickjs-sys`: raw, unsafe FFI bindings to the mquickjs C API
-- `mquickjs`: safe, idiomatic Rust wrapper built on top of `mquickjs-sys`
+- `mquickjs-rs`: safe, idiomatic Rust wrapper built on top of `mquickjs-sys`
 
 ## Requirements
 
@@ -16,13 +16,13 @@ This workspace contains two crates:
 ## Install from crates.io
 
 ```bash
-cargo add mquickjs
+cargo add mquickjs-rs
 ```
 
 Or in `Cargo.toml`:
 
 ```toml
-mquickjs = "0.1.0"
+mquickjs-rs = "0.1.0"
 ```
 
 ## Quick Start
@@ -31,25 +31,25 @@ Run the tests from the workspace root:
 
 ```bash
 cargo test -p mquickjs-sys
-cargo test -p mquickjs
+cargo test -p mquickjs-rs
 ```
 
 Generate documentation:
 
 ```bash
-cargo doc -p mquickjs --no-deps
+cargo doc -p mquickjs-rs --no-deps
 ```
 
 Run the example program:
 
 ```bash
-cargo run -p mquickjs --example eval
+cargo run -p mquickjs-rs --example eval
 ```
 
 ## Usage
 
 ```rust
-use mquickjs::{Context, Value};
+use mquickjs_rs::{Context, Value};
 
 let ctx = Context::new(1024 * 1024).expect("context should initialize");
 

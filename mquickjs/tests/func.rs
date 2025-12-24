@@ -1,4 +1,4 @@
-use mquickjs::{Context, JsError, Value};
+use mquickjs_rs::{Context, JsError, Value};
 
 #[test]
 fn register_fn_invokes_callback() {

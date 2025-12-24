@@ -6,7 +6,7 @@
 //! # Quick start
 //!
 //! ```no_run
-//! use mquickjs::Context;
+//! use mquickjs_rs::Context;
 //!
 //! let ctx = Context::new(1024 * 1024).expect("context should initialize");
 //! let value = ctx.eval_i32("1 + 2", "example").expect("eval should succeed");

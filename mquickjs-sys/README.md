@@ -2,7 +2,7 @@
 
 Low-level, unsafe Rust bindings to the MicroQuickJS engine.
 
-Most users should prefer the safe wrapper crate: `mquickjs`.
+Most users should prefer the safe wrapper crate: `mquickjs-rs`.
 
 ## Installation
 

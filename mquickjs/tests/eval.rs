@@ -1,4 +1,4 @@
-use mquickjs::{Context, JsError};
+use mquickjs_rs::{Context, JsError};
 
 #[test]
 fn eval_i32_returns_value() {

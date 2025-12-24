@@ -1,4 +1,4 @@
-use mquickjs::{Context, JsError};
+use mquickjs_rs::{Context, JsError};
 
 #[test]
 fn context_requires_minimum_memory() {

@@ -73,7 +73,7 @@ impl Context {
     /// Register a Rust callback callable from JavaScript.
     ///
     /// ```no_run
-    /// use mquickjs::{Context, Value};
+    /// use mquickjs_rs::{Context, Value};
     ///
     /// let ctx = Context::new(1024 * 1024).expect("context should initialize");
     /// ctx.register_fn("echo", |args: &[Value<'_>]| {

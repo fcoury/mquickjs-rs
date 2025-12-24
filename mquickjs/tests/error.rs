@@ -1,4 +1,4 @@
-use mquickjs::JsError;
+use mquickjs_rs::JsError;
 
 #[test]
 fn context_init_error_formats() {
