@@ -26,6 +26,6 @@ pub use context::Context;
 pub use convert::{Coerced, FromValue, IntoValue};
 pub use error::JsError;
 pub use object::{Array, Object};
-pub use rooted::RootedValue;
+pub use rooted::{Persistent, RootedValue};
 pub use runtime::Runtime;
 pub use value::Value;

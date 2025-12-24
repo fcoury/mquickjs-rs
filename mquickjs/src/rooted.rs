@@ -3,7 +3,7 @@ use std::ptr::NonNull;
 
 use mquickjs_sys::{JS_AddGCRef, JSContext, JS_DeleteGCRef, JSGCRef};
 
-use crate::value::Value;
+use crate::{Context, JsError, Value};
 
 /// A GC-rooted JavaScript value tied to a `Context` lifetime.
 #[derive(Debug)]
@@ -42,6 +42,40 @@ impl Drop for RootedValue<'_> {
     fn drop(&mut self) {
         unsafe {
             JS_DeleteGCRef(self.ctx.as_ptr(), &mut *self.gc_ref);
+        }
+    }
+}
+
+/// A persistent handle to a JavaScript value that can be cloned.
+#[derive(Debug)]
+pub struct Persistent<'ctx> {
+    rooted: RootedValue<'ctx>,
+}
+
+impl<'ctx> Persistent<'ctx> {
+    /// Create a persistent handle for the given value.
+    pub fn new(ctx: &'ctx Context, value: Value<'ctx>) -> Result<Self, JsError> {
+        if ctx.raw_ctx() != value.ctx() {
+            return Err(JsError::Conversion {
+                message: "value does not belong to context".to_string(),
+            });
+        }
+        Ok(Self {
+            rooted: RootedValue::new(ctx.raw_ctx(), value),
+        })
+    }
+
+    /// Return the persistent handle as a regular `Value`.
+    pub fn to_value(&self) -> Value<'ctx> {
+        self.rooted.to_value()
+    }
+}
+
+impl<'ctx> Clone for Persistent<'ctx> {
+    fn clone(&self) -> Self {
+        let value = self.rooted.to_value();
+        Self {
+            rooted: RootedValue::new(self.rooted.ctx, value),
         }
     }
 }
