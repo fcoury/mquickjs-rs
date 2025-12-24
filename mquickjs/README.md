@@ -11,7 +11,7 @@ cargo add mquickjs-rs
 Or in `Cargo.toml`:
 
 ```toml
-mquickjs-rs = "0.1.0"
+mquickjs-rs = "0.2.0"
 ```
 
 ## Usage

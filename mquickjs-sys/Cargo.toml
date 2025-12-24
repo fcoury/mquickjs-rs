@@ -1,6 +1,6 @@
 [package]
 name = "mquickjs-sys"
-version = "0.1.0"
+version = "0.2.0"
 description = "Low-level FFI bindings to the MicroQuickJS engine"
 license = "MIT"
 repository = "https://github.com/fcoury/mquickjs-rs"

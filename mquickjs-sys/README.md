@@ -13,7 +13,7 @@ cargo add mquickjs-sys
 Or in `Cargo.toml`:
 
 ```toml
-mquickjs-sys = "0.1.0"
+mquickjs-sys = "0.2.0"
 ```
 
 ## Notes

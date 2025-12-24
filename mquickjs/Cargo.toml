@@ -1,6 +1,6 @@
 [package]
 name = "mquickjs-rs"
-version = "0.1.0"
+version = "0.2.0"
 description = "Safe, idiomatic Rust wrapper for the MicroQuickJS engine"
 license = "MIT"
 repository = "https://github.com/fcoury/mquickjs-rs"
@@ -11,5 +11,5 @@ keywords = ["javascript", "quickjs", "embedded", "ffi"]
 categories = ["api-bindings", "embedded"]
 
 [dependencies]
-mquickjs-sys = { version = "0.1.0", path = "../mquickjs-sys" }
+mquickjs-sys = { version = "0.2.0", path = "../mquickjs-sys" }
 thiserror = "1.0"
