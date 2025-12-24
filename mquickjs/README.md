@@ -33,6 +33,38 @@ let echoed = ctx
 assert_eq!(echoed, "hello");
 ```
 
+## Conversions
+
+```rust
+use mquickjs_rs::{Context, FromValue, IntoValue};
+
+let ctx = Context::new(1024 * 1024).expect("context should initialize");
+
+let value = 42i32.into_value(&ctx).expect("convert into JS");
+let result = i32::from_value(value).expect("convert back");
+assert_eq!(result, 42);
+```
+
+## Objects and arrays
+
+```rust
+use mquickjs_rs::{Array, Context, Object};
+
+let ctx = Context::new(1024 * 1024).expect("context should initialize");
+
+let obj_value = ctx.eval("({})", "example").expect("eval should succeed");
+let obj = Object::from_value(&ctx, obj_value).expect("object should wrap");
+obj.set("name", "mquickjs").expect("set should succeed");
+let name: String = obj.get("name").expect("get should succeed");
+assert_eq!(name, "mquickjs");
+
+let array_value = ctx.eval("[]", "example").expect("eval should succeed");
+let array = Array::from_value(&ctx, array_value).expect("array should wrap");
+array.push(1i32).expect("push should succeed");
+let first: i32 = array.get(0).expect("get should succeed");
+assert_eq!(first, 1);
+```
+
 ## Notes
 
 - MicroQuickJS runs in a stricter ES5-like mode. See `../../mquickjs/README.md` for engine limitations.

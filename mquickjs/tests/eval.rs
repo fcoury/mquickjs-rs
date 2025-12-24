@@ -29,5 +29,5 @@ fn eval_invalid_js_returns_error() {
     let err = ctx
         .eval_i32("let =", "bad")
         .expect_err("expected eval error");
-    assert!(matches!(err, JsError::Runtime { .. }));
+    assert!(matches!(err, JsError::Exception { .. }));
 }

@@ -133,9 +133,8 @@ impl Context {
         };
 
         if value == js_exception_value() {
-            return Err(JsError::Runtime {
-                message: error_message(self.ctx.as_ptr()),
-            });
+            let (message, stack) = error_details(self.ctx.as_ptr());
+            return Err(JsError::Exception { message, stack });
         }
 
         Ok(value)
@@ -155,13 +154,21 @@ fn js_exception_value() -> JSValue {
     (JS_TAG_EXCEPTION as JSValue) | ((JS_EX_NORMAL as JSValue) << JS_TAG_SPECIAL_BITS)
 }
 
-fn error_message(ctx: *mut JSContext) -> String {
-    let mut buf = [0u8; 256];
+fn error_details(ctx: *mut JSContext) -> (String, Option<String>) {
+    let mut buf = vec![0u8; 2048];
     unsafe {
         JS_GetErrorStr(ctx, buf.as_mut_ptr() as *mut c_char, buf.len());
     }
     let end = buf.iter().position(|b| *b == 0).unwrap_or(buf.len());
-    String::from_utf8_lossy(&buf[..end]).into_owned()
+    let text = String::from_utf8_lossy(&buf[..end]).into_owned();
+    let mut parts = text.splitn(2, '\n');
+    let message = parts.next().unwrap_or_default().to_string();
+    let stack = parts
+        .next()
+        .map(str::trim_end)
+        .filter(|value| !value.is_empty())
+        .map(str::to_string);
+    (message, stack)
 }
 
 fn escape_js_string(input: &str) -> String {

@@ -28,5 +28,5 @@ fn register_fn_propagates_error() {
     let err = ctx
         .eval_i32("fail(1)", "test")
         .expect_err("expected runtime error");
-    assert!(matches!(err, JsError::Runtime { .. }));
+    assert!(matches!(err, JsError::Exception { .. }));
 }
