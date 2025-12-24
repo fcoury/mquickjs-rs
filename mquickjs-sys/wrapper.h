@@ -8,4 +8,7 @@
 
 extern const JSSTDLibraryDef js_stdlib;
 
+typedef JSValue (*JSHostCallback)(JSContext *ctx, JSValue *this_val, int argc, JSValue *argv);
+void JS_SetHostCallback(JSHostCallback callback);
+
 #endif /* MQUICKJS_SYS_WRAPPER_H */

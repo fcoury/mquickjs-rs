@@ -7,6 +7,7 @@ use mquickjs_sys::{
 };
 
 use crate::error::JsError;
+use crate::func::{register_callback, register_context, unregister_context};
 use crate::value::Value;
 
 /// JavaScript execution context owning the underlying mquickjs state.
@@ -36,6 +37,8 @@ impl Context {
             message: "JS_NewContext returned null".to_string(),
         })?;
 
+        register_context(ctx);
+
         Ok(Self { ctx, _heap: heap })
     }
 
@@ -63,6 +66,20 @@ impl Context {
     /// Evaluate a script and convert the result to String.
     pub fn eval_string(&self, script: &str, filename: &str) -> Result<String, JsError> {
         self.eval(script, filename)?.to_string()
+    }
+
+    /// Register a Rust callback callable from JavaScript.
+    pub fn register_fn<F>(&self, name: &str, func: F) -> Result<(), JsError>
+    where
+        F: for<'ctx> Fn(&[Value<'ctx>]) -> Result<Value<'ctx>, JsError> + 'static,
+    {
+        let id = register_callback(self.ctx, Box::new(func));
+        let name = escape_js_string(name);
+        let script = format!(
+            "globalThis['{name}'] = function() {{\n  var args = [{id}];\n  for (var i = 0; i < arguments.length; i++) {{\n    args.push(arguments[i]);\n  }}\n  return load.apply(null, args);\n}};"
+        );
+        self.eval_raw(&script, "<register_fn>")?;
+        Ok(())
     }
 
     fn eval_raw(&self, script: &str, filename: &str) -> Result<JSValue, JsError> {
@@ -95,6 +112,7 @@ impl Context {
 
 impl Drop for Context {
     fn drop(&mut self) {
+        unregister_context(self.ctx.as_ptr());
         unsafe {
             JS_FreeContext(self.ctx.as_ptr());
         }
@@ -112,4 +130,19 @@ fn error_message(ctx: *mut JSContext) -> String {
     }
     let end = buf.iter().position(|b| *b == 0).unwrap_or(buf.len());
     String::from_utf8_lossy(&buf[..end]).into_owned()
+}
+
+fn escape_js_string(input: &str) -> String {
+    let mut escaped = String::with_capacity(input.len());
+    for ch in input.chars() {
+        match ch {
+            '\\' => escaped.push_str("\\\\"),
+            '\'' => escaped.push_str("\\'"),
+            '\n' => escaped.push_str("\\n"),
+            '\r' => escaped.push_str("\\r"),
+            '\t' => escaped.push_str("\\t"),
+            _ => escaped.push(ch),
+        }
+    }
+    escaped
 }

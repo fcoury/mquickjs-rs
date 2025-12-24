@@ -25,6 +25,10 @@ impl<'ctx> Value<'ctx> {
         }
     }
 
+    pub(crate) fn raw(&self) -> JSValue {
+        self.raw
+    }
+
     /// Convert the value to i32.
     pub fn to_i32(&self) -> Result<i32, JsError> {
         let ctx = self.ctx.as_ptr();
