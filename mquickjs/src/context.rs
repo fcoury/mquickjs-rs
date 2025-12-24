@@ -133,8 +133,7 @@ impl Context {
         };
 
         if value == js_exception_value() {
-            let (message, stack) = error_details(self.ctx.as_ptr());
-            return Err(JsError::Exception { message, stack });
+            return Err(exception_error(self.ctx.as_ptr()));
         }
 
         Ok(value)
@@ -169,6 +168,11 @@ fn error_details(ctx: *mut JSContext) -> (String, Option<String>) {
         .filter(|value| !value.is_empty())
         .map(str::to_string);
     (message, stack)
+}
+
+pub(crate) fn exception_error(ctx: *mut JSContext) -> JsError {
+    let (message, stack) = error_details(ctx);
+    JsError::Exception { message, stack }
 }
 
 fn escape_js_string(input: &str) -> String {
