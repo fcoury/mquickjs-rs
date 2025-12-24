@@ -1,7 +1,10 @@
-use std::ffi::c_void;
+use std::ffi::{c_char, c_void, CString};
 use std::ptr::NonNull;
 
-use mquickjs_sys::{js_stdlib, JSContext, JS_FreeContext, JS_NewContext};
+use mquickjs_sys::{
+    js_stdlib, JSContext, JS_EVAL_RETVAL, JS_Eval, JS_EX_NORMAL, JS_FreeContext,
+    JS_GetErrorStr, JS_NewContext, JS_TAG_EXCEPTION, JS_TAG_SPECIAL_BITS, JSValue,
+};
 
 use crate::error::JsError;
 use crate::value::Value;
@@ -37,10 +40,56 @@ impl Context {
     }
 
     /// Evaluate a script and return a raw value wrapper.
-    pub fn eval(&self, _script: &str, _filename: &str) -> Result<Value, JsError> {
-        Err(JsError::Runtime {
-            message: "not yet implemented".to_string(),
-        })
+    pub fn eval(&self, script: &str, filename: &str) -> Result<Value<'_>, JsError> {
+        let value = self.eval_raw(script, filename)?;
+        Ok(Value::new(self.ctx, value))
+    }
+
+    /// Evaluate a script and convert the result to i32.
+    pub fn eval_i32(&self, script: &str, filename: &str) -> Result<i32, JsError> {
+        self.eval(script, filename)?.to_i32()
+    }
+
+    /// Evaluate a script and convert the result to bool.
+    pub fn eval_bool(&self, script: &str, filename: &str) -> Result<bool, JsError> {
+        self.eval(script, filename)?.to_bool()
+    }
+
+    /// Evaluate a script and convert the result to f64.
+    pub fn eval_f64(&self, script: &str, filename: &str) -> Result<f64, JsError> {
+        self.eval(script, filename)?.to_f64()
+    }
+
+    /// Evaluate a script and convert the result to String.
+    pub fn eval_string(&self, script: &str, filename: &str) -> Result<String, JsError> {
+        self.eval(script, filename)?.to_string()
+    }
+
+    fn eval_raw(&self, script: &str, filename: &str) -> Result<JSValue, JsError> {
+        let script = CString::new(script).map_err(|_| JsError::Runtime {
+            message: "script contains null byte".to_string(),
+        })?;
+        let filename = CString::new(filename).map_err(|_| JsError::Runtime {
+            message: "filename contains null byte".to_string(),
+        })?;
+
+        let value = unsafe {
+            JS_Eval(
+                self.ctx.as_ptr(),
+                script.as_ptr() as *const c_char,
+                script.as_bytes().len(),
+                filename.as_ptr(),
+                JS_EVAL_RETVAL as i32,
+            )
+        };
+
+        if value == js_exception_value() {
+            return Err(JsError::Runtime {
+                message: error_message(self.ctx.as_ptr()),
+            });
+        }
+
+        Ok(value)
     }
 }
 
@@ -50,4 +99,17 @@ impl Drop for Context {
             JS_FreeContext(self.ctx.as_ptr());
         }
     }
+}
+
+fn js_exception_value() -> JSValue {
+    (JS_TAG_EXCEPTION as JSValue) | ((JS_EX_NORMAL as JSValue) << JS_TAG_SPECIAL_BITS)
+}
+
+fn error_message(ctx: *mut JSContext) -> String {
+    let mut buf = [0u8; 256];
+    unsafe {
+        JS_GetErrorStr(ctx, buf.as_mut_ptr() as *mut c_char, buf.len());
+    }
+    let end = buf.iter().position(|b| *b == 0).unwrap_or(buf.len());
+    String::from_utf8_lossy(&buf[..end]).into_owned()
 }
