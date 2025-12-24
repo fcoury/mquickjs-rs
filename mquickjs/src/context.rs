@@ -3,11 +3,12 @@ use std::ptr::NonNull;
 
 use mquickjs_sys::{
     js_stdlib, JSContext, JS_EVAL_RETVAL, JS_Eval, JS_EX_NORMAL, JS_FreeContext,
-    JS_GetErrorStr, JS_NewContext, JS_TAG_EXCEPTION, JS_TAG_SPECIAL_BITS, JSValue,
+    JS_GC, JS_GetErrorStr, JS_NewContext, JS_TAG_EXCEPTION, JS_TAG_SPECIAL_BITS, JSValue,
 };
 
 use crate::error::JsError;
 use crate::func::{register_callback, register_context, unregister_context};
+use crate::rooted::RootedValue;
 use crate::value::Value;
 
 /// JavaScript execution context owning the underlying mquickjs state.
@@ -68,6 +69,18 @@ impl Context {
     /// Evaluate a script and convert the result to String.
     pub fn eval_string(&self, script: &str, filename: &str) -> Result<String, JsError> {
         self.eval(script, filename)?.to_string()
+    }
+
+    /// Force a garbage collection cycle.
+    pub fn gc(&self) {
+        unsafe {
+            JS_GC(self.ctx.as_ptr());
+        }
+    }
+
+    /// Root a value to keep it alive across GC cycles.
+    pub fn root<'ctx>(&'ctx self, value: Value<'ctx>) -> RootedValue<'ctx> {
+        RootedValue::new(self.ctx, value)
     }
 
     /// Register a Rust callback callable from JavaScript.

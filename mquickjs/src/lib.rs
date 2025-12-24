@@ -16,8 +16,10 @@
 mod context;
 mod error;
 mod func;
+mod rooted;
 mod value;
 
 pub use context::Context;
 pub use error::JsError;
+pub use rooted::RootedValue;
 pub use value::Value;
